@@ -16,11 +16,23 @@ class ApiAccount {
   factory ApiAccount.fromJson(String str) =>
       ApiAccount.fromMap(json.decode(str));
 
-  factory ApiAccount.fromMap(Map<String, dynamic> json) => ApiAccount(
-        uuid: json["UuId"],
-        persoon: ApiPersoon.fromMap(json["Persoon"]),
-        groep: List<Groep>.from(json["Groep"].map((x) => Groep.fromMap(x))),
-      );
+  factory ApiAccount.fromMap(Map<String, dynamic> json) {
+    Map<String, dynamic>? persoonJson = json["Persoon"];
+
+    if (persoonJson == null &&
+        json["Kinderen"] != null &&
+        (json["Kinderen"] as List).isNotEmpty) {
+      persoonJson = (json["Kinderen"] as List).first;
+    }
+
+    return ApiAccount(
+      uuid: json["UuId"] ?? "",
+      persoon: ApiPersoon.fromMap(persoonJson ?? {}),
+      groep: json["Groep"] != null
+          ? List<Groep>.from(json["Groep"].map((x) => Groep.fromMap(x)))
+          : [],
+    );
+  }
 }
 
 class Groep {
